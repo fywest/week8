@@ -1,3 +1,4 @@
 from .front import front
-from .course_old import course
+from .course import course
 from .admin import admin
+from .user import user
