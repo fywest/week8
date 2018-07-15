@@ -4,6 +4,9 @@ from wtforms.validators import Length, Email, EqualTo, Required
 from simpledu.models import db, User
 from wtforms import ValidationError
 import re
+from wtforms import TextAreaField, IntegerField
+from simpledu.models import Course
+from wtforms.validators import URL,NumberRange
 
 
 class RegisterForm(FlaskForm):
@@ -59,3 +62,28 @@ class LoginForm(FlaskForm):
         if user and not user.check_password(field.data):
             raise ValidationError('密码错误')
     submit = SubmitField('Submit')
+
+class CourseForm(FlaskForm):
+    name = StringField('Course Name', validators=[Required(), Length(5, 32)])
+    description = TextAreaField('Course Brief Intro', validators=[Required(), Length(20, 256)])
+    image_url = StringField('Cover Picture', validators=[Required(), URL()])
+    author_id = IntegerField('Author ID', validators=[Required(), NumberRange(min=1, message='Invalid ID')])
+    submit = SubmitField('Submit')
+
+    def validate_author_id(self, field):
+        if not User.query.get(self.author_id.data):
+            raise ValidationError('user not exist')
+
+    def create_course(self):
+        course = Course()
+        # 使用课程表单数据填充 course 对象
+        self.populate_obj(course)
+        db.session.add(course)
+        db.session.commit()
+        return course
+
+    def update_course(self, course):
+        self.populate_obj(course)
+        db.session.add(course)
+        db.session.commit()
+        return course
