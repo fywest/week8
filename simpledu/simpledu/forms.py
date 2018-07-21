@@ -1,11 +1,10 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField
 from wtforms.validators import Length, Email, EqualTo, Required
-from simpledu.models import db, User
+from simpledu.models import db, User,Course,Live
 from wtforms import ValidationError
 import re
 from wtforms import TextAreaField, IntegerField
-from simpledu.models import Course
 from wtforms.validators import URL,NumberRange
 
 
@@ -87,3 +86,19 @@ class CourseForm(FlaskForm):
         db.session.add(course)
         db.session.commit()
         return course
+
+
+class LiveForm(FlaskForm):
+    name = StringField('Course Name', validators=[Required(), Length(1, 128)])
+    user_id = IntegerField('Live User ID', validators=[Required(), NumberRange(min=1, message='invalid ID')])
+    submit = SubmitField('Submit')
+
+    def validate_user_id(self, field):
+        if not User.query.get(self.user_id.data):
+            raise ValidationError('user does not exist')
+
+    def create_live(self):
+        live = Live()
+        self.populate_obj(live)
+        db.session.add(live)
+        db.session.commit()
