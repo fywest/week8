@@ -102,3 +102,7 @@ class LiveForm(FlaskForm):
         self.populate_obj(live)
         db.session.add(live)
         db.session.commit()
+
+class MessageForm(FlaskForm):
+    text = StringField('System message', validators=[Required(), Length(1, 256)])
+    submit = SubmitField('Submit')
